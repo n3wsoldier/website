@@ -1,281 +1,240 @@
-# Malwares
+# Sniffing 
 
-> ⚡︎ **This chapter has [practical labs](https://github.com/Samsar4/Ethical-Hacking-Labs/tree/master/6-Malware)**
+> ⚡︎ **This chapter has [practical labs](https://github.com/Samsar4/Ethical-Hacking-Labs/tree/master/7-Sniffing)**
 
-### - **What is Malware?**
-*Any software intentionally designed to cause damage to a computer, server or computer network. The code is described as computer viruses, worms, Trojan horses, ransomware, spyware, adware, and scareware, among other terms. Malware has a malicious intent, acting against the interest of the computer user.*
+*Sniffing is the process of monitoring and capturing all the packets passing through a given network using sniffing tools. It is a form of “tapping phone wires” and get to know about the conversation. It is also called wiretapping applied to the computer networks.*
 
-## <u>Types of Viruses and Worms 🐛 </u>
-* **How it works?**
-  1. Infection Phase - a virus planted on a target system and replicates itself and attaches to one or more executable files
-  2. Attack phase - the infected file is executed accidentally by the user, or in some way is deployed and activated
+## <u>Active and Passive Sniffing</u>
 
-- **Virus** - Designed to spread from host to host and has the ability to replicate itself. They cannot reproduce/spread without help. They operate by inserting or attaching itself to a legitimate program or document in order to execute its code.
+- **Passive sniffing** - watching network traffic without interaction; only works for same collision domain
+- **Active sniffing** - uses methods to make a switch send traffic to you even though it isn't destined for your machine
+- **Span port** - switch configuration that makes the switch send a copy of all frames from other ports to a specific port
+  - Not all switches have the ability to do this
+  - Modern switches sometimes don't allow span ports to send data - you can only listen
+- **Network tap** - special port on a switch that allows the connected device to see all traffic
+  - ![net-tap](https://i1.wp.com/ipwithease.com/wp-content/uploads/2014/06/NETWORK-TAP.jpg?resize=768%2C429&ssl=1)
+- **Port mirroring** - another word for span port
 
-- **Macro Virus** - Written in a macro language (e.g: VBA) and that is platform independent. 
+## <u>Basics</u>
 
-- **Compression Viruses** - Another type of virus that appends itself to executables on the system and compresses them by user's permissions.
+ - Sniffing is capturing packets as they pass on the wire to review for interesting information
+ - **MAC**  (Media Access Control) - physical or burned-in address - assigned to NIC for communications at the Data Link layer
+    - 48 bits long
+    - Displayed as 12 hex characters separated by colons
+    - First half of address is the **organizationally unique identifier** - identifies manufacturer
+    - Second half ensures no two cards on a subnet will have the same address
+ - NICs normally only process signals meant for it
+ - **Promiscuous mode** - NIC must be in this setting to look at all frames passing on the wire
+ - **CSMA/CD** - Carrier Sense Multiple Access/Collision Detection - used over Ethernet to decide who can talk
+ - **Collision Domains**
+    - Traffic from your NIC (regardless of mode) can only be seen within the same collision domain
+    - Hubs by default have one collision domain
+    - Switches have a collision domain for each port
 
-- **Stealth Virus** - Hides the modifications it has made; Trick antivirus software; intercepting its requests to the OS and provides false and bogus information.
+## <u>Protocols Susceptible</u>
+*Some of the protocols that are vulnerable to sniffing attacks.*
 
-- **Polymorphic Virus** - Produces varied but operational copies of itself. A polymorphic virus may have no parts that remain identifcal between infections, making it very hard to detect using signatures.
+- **IMAP**, **POP3**, **NNTP** and **HTTP** all  send over clear text data
 
-- **Multipart Virus** - Attempts to infect both boot sector and files; generally refers to viruses with multiple infection methods
+- **SMTP** is sent in plain text and is viewable over the wire. SMTP v3 limits the information you can get, but you can still see it.
 
-- **Self-garbling (metamorphic) virus** - Rewrites itself every time it infects a new file.
+- **FTP** sends user ID and password in clear text
 
-- **Other Virus Types**
-  - **Boot Sector Virus** - known as system virus; moves boot sector to another location and then inserts its code int he original location
-  - **Shell Virus** - wraps  around an application's code, inserting itself before the application's
-  - **Cluster Virus** - modifies directory table entries so every time a file or folder is opened, the virus runs
-  - **Encryption Virus** - uses  encryption to hide the code from antivirus
-  - **Cavity Virus** - overwrite portions of host files as to not increase the actual size of the file; uses null content sections
-  - **Sparse Infector Virus** - only infects occasionally (e.g. every 10th time)
-  - **File Extension Virus** - changes the file extensions of files to take advantage of most people having them turned off (readme.txt.vbs shows as readme.txt)
+- **TFTP** passes everything in clear text
 
-- **Virus Makers**
-  - Sonic Bat
-  - PoisonVirus Maker
-  - Sam's Virus Generator
-  - JPS Virus Maker
+- **TCP** shows sequence numbers (usable in session hijacking)
 
-- **Worm** - self-replicating malware that sends itself to other computers without human intervention
-  - Usually doesn't infect files - just resides in active memory
-  - Often used in botnets
+- **TCP** and **UCP** show open ports
 
-- **Ghost Eye Worm** - hacking tool that uses random messaging on Facebook and other sites to perform a host of malicious efforts.
-
-- **Logic Bomb** - Executes a program when a certain event happens or a date and time arrives.
-
-- **Rootkit** - Set of malicious tools that are loaded on a compromised system through stealthy techniques; Very hard to detect; 
-
-- **Ransomware** - malicious software designed to deny access to a computer until a price is paid; usually spread through email
-  - **WannaCry** - famous ransomware; within 24 hours had 230,000 victims; exploited unpatched SMB vulnerability
-    - **Other Examples**
-      - Cryptorbit
-      - CryptoLocker
-      - CryptoDefense
-      - police-themed
-
-- **Trojan horse** - A program that is disguised as another legitimate program with the goal of carrying out malicious activities in the background without user's knowledge.
-  - **RAT - Remote Access Trojans** - Malicious programs that run on systems and allow intruders to access and use a system remotely.
-
-- **Immunizer** - Attaches code to a file or application, which would fool a virus into 'thinking' it was already infected. (e.g: like human vaccine).
-
-- **Behavior blocking** - Allowing the suspicious code to execute within the OS and watches its interactions looking for suspicious activities.
-
-> **️⚠️ - Viruses needs help/interaction to propagate; Worms self propagates**
-
-### Major characteristics of viruses:
-1. Infecting other files
-2. Alteration of data
-3. Transforms itself
-4. Corruption of files and data
-5. Encrypts itself
-6. Self-replication
-
-### Stages of Virus Lifecycle:
-1. Design
-2. Replication
-3. Launch
-4. Detection 
-5. Incorporation - A.V. figures out the virus pattern & builds signatures to identify and eliminate the virus
-6. Execution of the damage routine - A.V. to the rescue
-
-## <u>Malware Basics</u>
-* **How is malware distributed?**
-  - SEO manipulation
-  - Social Engineering / Click-jacking
-  - Phishing
-  - Malvertising
-  - Compromising legitimate sites
-  - Drive-by downloads
-  - Spam
-
-- **Malware** - software designed to harm or secretly access a computer system without informed consent
-  - Most is downloaded from the Internet with or without the user's knowledge
-
-- **Overt Channels** - legitimate communication channels used by programs
-
-- **Covert Channels** - used to transport data in unintended ways
-
-- **Wrappers** - programs that allow you to bind an executable to an innocent file
-
-### **Basic components of Malware**
-1. **Crypters** - use a combination of encryption and code manipulation to render malware undetectable to security programs; protects from being scanned or found during analysis.
-
-2. **Downloader** - Used to download additional malware.
-
-3. **Dropper** - Used to install additional malware into the target system.
-
-4. **Exploit** - Malicious code used to execute on a specific vulnerability.
-
-5. **Injector** - Used to expose vulnerable processes in the target system to the exploit.
-
-6. **Obfuscator** - Used to conceal the true purpose of the malware.
-
-7. **Packers** - Used to bundle all of the malware files together into a single executable.
-
-8. **Payload** - Used to take over the target machine.
-
-9. **Malicious Code** - Used to define the abilities of the malware.
-
-**Exploit Kits** - help deliver exploits and payloads
-- Infinity
-- Bleeding Life
-- Crimepack
-- Blackhole Exploit Kit
-
-## <u>Trojans 🐴</u>
-
-- Software that appears to perform a desirable function but instead performs malicious activity
-  - To hackers, it is a method to gain and maintain access to a system
-  - Trojans are means of delivery whereas a backdoor provides the open access
-  - Trojans are typically spread through **Social Engineering**.
-
-- **Types of Trojans:**
-  - **Defacement trojan**
-  - **Proxy server trojan**
-  - **Botnet trojan**
-    - Chewbacca
-    - Skynet
-  - **Remote access trojans**
-    - RAT
-    - MoSucker
-    - Optix Pro
-    - Blackhole
-  - **E-banking trojans**
-    - Zeus
-    - Spyeye
-  - **IoT Trojans**
-  - **Security Software Disable Trojans**
-  - **Command Shell Trojan** - Provides a backdoor to connect to through command-line access
-    - Netcat
-  - **Covert Channel Tunneling Trojan** (CCTT) - a RAT trojan; creates data transfer channels in previously authorized data streams
-
-### Infection Process:
-1. Creation of a Trojan using Trojan Construction Kit
-2. Create a Dropper
-    - Used to install additional malware into the target system.
-3. Create a Wrapper
-    - Wrappers - programs that allow you to bind an executable to an innocent file
-4. Propagate the Trojan
-5. Execute the Dropper
-
-### **Trojan Port Numbers**:
-
-| Trojan Name        | TCP Port   |
-|--------------------|--------|
-| Death              | 2      |
-| Senna Spy          | 20     |
-| Blade Runner, Doly Trojan, Fore, Invisble FTP, WebEx, WinCrash | 21 |
-| Shaft | 22|
-| Executor | 80 |
-| Hackers Paradise   | 31,456 |
-| TCP Wrappers       | 421    |
-| Ini-Killer | 555 |
-| Doom, Santaz Back  | 666    |
-| Silencer, WebEx    | 1001   |
-| DolyTrojan | 1011 |
-| RAT                | 1095-98|
-| SubSeven           | 1243   |
-| Shiva-Burka        | 1600   |
-| Trojan Cow         | 2001   |
-| Deep Throat        | 6670-71|
-| Tini               | 7777   |
-| Dumaru.Y | 10000 |
-| SubSeven 1.0-1.8,  MyDoom.B | 10080
-| VooDoo Doll, NetBus 1.x, GabanBus, Pie Bill Gates, X-Bill | 12345
-| Whack a Mole       | 12361-3|
-| NetBus | 17300 |
-| Back Orifice       | 31337,8|
-| SubSeven, PhatBot, AgoBot, Gaobot | 65506 |
-
-> **⚠️ - Its not necessary to know every possible trojan port in the history for the CEH exam, it's good for understanding.**
-
-### **Trojan Countermeasures**
-1. Avoid cicking on unusual or suspect email attachments
-2. Block unused ports
-3. Monitor network traffic
-4. Avoid downloading from unstrusted sources
-5. Install & updated anti-virus software
-6. Scan removable media before use
-7. Validate file integrity of all externally sourced software
-8. Enable auditing
-9. Configure Host-Based firewalls
-10. Use IDS
-
-### Techniques
-- **`netstat -an`** - shows open ports in numerical order
-- **`netstat -b`** - displays all active connections and the processes using them
-- **Process Explorer** - Microsoft tool that shows you everything about running processes
-- **Registry Monitoring Tools**
-  - SysAnalyzer
-  - Tiny Watcher
-  - Active Registry Monitor
-  - Regshot
-- **Msconfig** - Windows program that shows all programs set to start on startup
-- **Tripwire** - integrity verifier that can act as a HIDS in protection against trojans
-- **SIGVERIF** - build into Windows to verify the integrity of the system
-  - Log  file can be found at `c:\windows\system32\sigverif.txt`
-  - Look for drivers that are not signed
-
-## <u>Malware Analysis</u>
-*Malware analysis is the study or process of determining the functionality, origin and potential impact of a given malware sample such as a virus, worm, trojan horse, rootkit, or backdoor.*
-### **Types of Malware analysis:**
-1. **Static (Code Analysis)** - performed by fragmenting the binary file into individual elements that can be analyzed without executing them.
-    - File fingerprinting
-    - Local & online scanning of elements to see if they match known malware profiles
-    - String searching
-    - Identifying packers/obfuscators used
-    - Identifying the PE's (portable executable) information
-    - Identify dependencies
-    - Malware disassembly
-
-2. **Dynamic (Behavioral Analysis)** - performed by executing the malware to see what effect it has on the system.
-    -  System baselining
-    - Host integrity monitoring
-- **Tools for Disassembling | Debugging | Reverse Engineering:**
-  - IDA Pro
-  - OllyDdg 
-  - Ghidra by NSA
-
-- **Sheepdip** - Dedicated computer which is used to test files on removable media for viruses before they are allowed to be used with other computers.
-
-### **Steps**
-1. Make sure you have a good test bed
-    - Use a VM with NIC in host-only mode and no open shares
-2. Analyze the malware on the isolated VM in a static state
-    - Tools - binText and UPX help with looking at binary
-3. Run the malware and check out processes
-    - Use Process Monitor, etc. to look at processes
-    - Use NetResident, TCPview or even Wireshark to look at network activity
-4. Check and see what files were added, changed, or deleted
-    - Tools - IDA Pro, VirusTotal, Anubis, Threat Analyzer
-
-- **Preventing Malware**
-  - Make sure you know what is going on in your system
-  - Have a good antivirus that is up to date
-    - Airgapped - isolated on network
+- **IP** shows source and destination addresses
 
 
-## <u>Rootkits</u>
+## <u>ARP</u>
 
-- Software put in place by attacker to obscure system compromise
-- Hides processes and files
-- Also allows for future access
-- **Examples**
-  - Horsepill - Linus kernel rootkit inside initrd
-  - Grayfish - Windows rootkit that injects in boot record
-  - Firefef - multi-component family of malware
-  - Azazel
-  - Avatar
-  - Necurs
-  - ZeroAccess
-- **Hypervisor level** - rootkits that modify the boot sequence of a host system to load a VM as the host OS
-- **Hardware** - hide malware in devices or firmware
-- **Boot loader level** - replace boot loader with one controlled by hacker
-- **Application level** - directed to replace valid application files with Trojans
-- **Kernel level** - attack boot sectors and kernel level replacing kernel code with back-door code; most dangerous
-- **Library level** - use system-level calls to hide themselves
-- One way to detect rootkits is to map all the files on a system and then boot a system from a clean CD version and compare the two file systems
+- Stands for Address Resolution Protocol
+- Resolves IP address to a MAC address
+- Packets are ARP_REQUEST and ARP_REPLY
+- Each computer maintains it's own ARP cache, which can be poisoned
+- **Commands**
+  - **`arp -a`** displays current ARP cache
+  - **`arp -d *`** clears ARP cache
+- Works on a broadcast basis - both requests and replies are broadcast to everyone
+- **Gratuitous ARP** - special packet to update ARP cache even without a request
+  - This is used to poison cache on other machines
+
+## <u>IPv6</u>
+
+- Uses 128-bit address
+- Has eight groups of four hexadecimal digits
+- Sections with all 0s can be shorted to nothing (just has start and end colons)
+- Double colon can only be used once
+- Loopback address is ::1
+
+| IPv6 Address Type | Description                                           |
+| ----------------- | ----------------------------------------------------- |
+| Unicast           | Addressed and intended for one host interface         |
+| Multicast         | Addressed for multiple host interfaces                |
+| Anycast           | Large number of hosts can receive; nearest host opens |
+
+| IPv6 Scopes | Description                                                  |
+| ----------- | ------------------------------------------------------------ |
+| Link local  | Applies only to hosts on the same subnet (Address block fe80::/10) |
+| Site local  | Applies to hosts within the same organization (Address block FEC0::/10) |
+| Global      | Includes everything                                          |
+
+- Scope applies for multicast and anycast
+- Traditional network scanning is **computationally less feasible**
+
+## <u>Wiretapping</u>
+*Wiretapping, also known as telephone tapping, is the process of monitoring telephone and Internet conversations by a third party, often by covert means.*
+
+- **Lawful interception** - Legally intercepting communications between two parties
+- **Active** - Interjecting something into the communication
+- **Passive** - Only monitors and records the data
+- **PRISM** - System used by NSA to wiretap external data coming into US
+
+
+## <u>MAC Flooding</u>
+
+- Switches either flood or forward data
+- If a switch doesn't know what MAC address is on a port, it will flood the data until it finds out
+- **CAM Table** - the table on a switch that stores which MAC address is on which port
+  - If table is empty or full, everything is sent  to all ports
+
+- MAC Flooding will often destroy the switch before you get anything useful, doesn't last long and it will get you noticed.  Also, most modern switches protect against this.
+
+- **CAM Table Overflow Attack** - Occurs when an attacker connects to a single or multiple switch ports and then runs a tool that mimics the existence of thousands of random MAC addresses on those switch ports. The switch enters these into the CAM table, and eventually the CAM table fills to capacity. *(This works by sending so many MAC addresses to the CAM table that it can't keep up).* **This attack can be performed by using macof.**
+<br>
+- ![macof](https://i0.wp.com/kalilinuxtutorials.com/wp-content/uploads/2015/09/macof2.png)
+
+
+- **Tools for MAC flooding**
+  - Etherflood
+  - Macof
+  - Dsniff 
+
+## <u>Switch port stealing</u>
+Tries to update information regarding a specific port in a race condition
+1. ARP Flood
+    - Source MAC address same a victim
+    - Destination MAC is attacker's
+    - CAM updates port info (stolen)
+2. Attacker now intercepts victim traffic
+3. Attacker stops flooding
+4. Victim reclaims port
+5. Attacker retransmits captured data
+6. Attacker repeats flooding
+
+## <u>ARP Poisoning</u>
+![arp](https://upload.wikimedia.org/wikipedia/commons/thumb/3/33/ARP_Spoofing.svg/1200px-ARP_Spoofing.svg.png)
+***ARP spoofing** is a type of attack in which a malicious actor sends falsified ARP (Address Resolution Protocol) messages over a local area network. This results in the linking of an attacker's MAC address with the IP address of a legitimate computer or server on the network.*
+
+- **Also called ARP spoofing or gratuitous ARP**
+- This can trigger alerts because of the constant need to keep updating the ARP cache of machines
+- Changes the cache of machines so that packets are sent to you instead of the intended target
+- **Countermeasures**
+  - Dynamic ARP Inspection using DHCP snooping
+  - Can use Static ARP ACL to map
+  - Header to Payload validation
+  - XArp software  can also watch for this
+  - Default gateway MAC can also be added permanently into each machine's cache
+- **Tools for ARP Poisoning**
+  - Cain and Abel
+  - WinArpAttacker
+  - Ufasoft
+  - dsniff
+
+## <u>DHCP Starvation</u>
+*Is an attack that targets DHCP servers whereby forged DHCP requests are crafted by an attacker with the intent of exhausting all available IP addresses that can be allocated by the DHCP server.*
+
+- Attempt to exhaust all available addresses from the server
+- Attacker sends so many requests that the address space allocated is exhausted
+- DHCPv4 packets - `DHCPDISCOVER`, `DHCPOFFER`, `DHCPREQUEST`, `DHCPACK`
+- DHCPv6 packets - Solicit, Advertise, Request (Confirm/Renew), Reply
+- **DHCP Steps**
+  1. Client sends `DHCPDISCOVER`
+  2. Server responds with `DHCPOFFER`
+  3. Client sends request for IP with `DHCPREQUEST`
+  4. Server sends address and config via `DHCPACK`
+- **Tools**
+  - Yersinia
+  - DHCPstarv
+- Mitigation is to configure DHCP snooping
+- **Rogue DHCP Server** - setup to offer addresses instead of real server.  Can be combined with starvation to real server.
+
+## <u>Spoofing</u>
+
+- **MAC Spoofing** - Changes your MAC address.  Benefit is CAM table uses most recent address.
+  - Port security can slow this down, but doesn't always stop it.
+  - MAC Spoofing makes the switch send all packets to your address instead of the intended one until the CAM table is updated with the real address again.
+
+- **IRDP Spoofing** - Attacker sends ICMP Router Discovery Protocol messages advertising a malicious gateway.
+
+- **DNS Poisoning** - Changes where machines get their DNS info from, allowing attacker to redirect to malicious websites.
+
+## <u>Sniffing Tools</u>
+
+### **Wireshark**
+*Wireshark is the world’s foremost and widely-used network protocol analyzer. It lets you see what’s happening on your network at a microscopic level.*
+- With Wirehsark you can inspect and detect ARP poisonings, Rogue DHCP servers, Broadcast Storm etc.
+
+- ![ws](https://camo.githubusercontent.com/9a68907d89fefb9c1bcc0eae0c25c154c6868f62/68747470733a2f2f75706c6f61642e77696b696d656469612e6f72672f77696b6970656469612f636f6d6d6f6e732f302f30332f57697265736861726b5f73637265656e73686f742e706e67)
+  - Previously known as Ethereal
+  - Can be used to follow streams of data
+  - Can also filter the packets so you can find a specific type or specific source address
+
+- **Wireshark filters**:
+  - **`!(arp or icmp or dns)`**
+      - Filters out the "noise" from ARP, DNS and ICMP requests
+        - **!** - Clears out the protocols for better inspection
+  - **`tcp.port == 23`**
+      - Look for **specific ports** using tcp.port
+  - **`ip.addr == 10.0.0.165`**
+      - Look for specific **IP address**
+  - **`ip.addr == 172.17.15.12 && tcp.port == 23`**
+      - Displays telnet packets containing that IP
+  - **`ip.src == 10.0.0.224 && ip.dst == 10.0.0.156`**
+      - See all packets exchanged from IP source to destination IP
+  - **`http.request`** 
+      - Displays HTTP GET requests
+  - **`tcp contains string`**
+      - Displays TCP segments that contain the word "string"
+  - **`tcp.flags==0x16`**
+      - Filters TCP requests with ACK flag set
+
+### **tcpdump**
+*Tcpdump is a data-network packet analyzer computer program that runs under a command line interface. It allows the user to display TCP/IP and other packets being transmitted or received over a network to which the computer is attached.*
+- ![tcpdump](https://camo.githubusercontent.com/33a479b12001431323304fb8a5f75ea65444357f/68747470733a2f2f7061636b6574666c6f77732e636f6d2f77702d636f6e74656e742f75706c6f6164732f323031372f30352f74637064756d705f692e706e67)
+- **Syntax**
+  - <**tcpdump flag(s) interface**>
+  - `tcpdump -i eth1`
+      - Puts the interface in listening mode
+- WinDump is a Windows version similar to tcpdump.
+
+### **tcptrace**
+- Analyzes files produced by packet capture programs such as Wireshark, tcpdump and Etherpeek
+
+### **Other Tools**
+- **Ettercap** - also can be used for MITM attacks, ARP poisoning.  Has active and passive sniffing.
+- **Capsa Network Analyzer**
+- **Snort** - usually discussed as an Intrusion Detection application
+- **Sniff-O-Matic**
+- **EtherPeek**
+- **WinDump**
+- **WinSniffer**
+
+## **Defending and Countermeasures techniques against Sniffing**:
+  - Disable ARP Dynamic
+  - ARP Spoofing detection tools
+  - Encrypt all the traffic that leaves your system
+  - Avoid public Wi-Fi spots
+  - Network scanning and monitoring
+  - Reverse DNS lookup's on logs == Sniffer
+  - **Ping** suspect clients with **wrong MAC address**
+      - If suspect accepts the packet, is a good indication that he is sniffing the network / using NIC in promiscuous mode.
+  - Use **Nmap** with nse-script for **Sniffer Detect**:
+      - **`nmap --script=sniffer-detect <target>`**
+  
+
+
+
