@@ -1,186 +1,113 @@
+# 9. <u>Session Hijacking</u>
 
-# 8. Denial of Service
+> ⚡︎ **This chapter has [practical labs](https://github.com/Samsar4/Ethical-Hacking-Labs/tree/master/10-Session-Hijacking)**
 
-> ⚡︎ **This chapter has [practical labs](https://github.com/Samsar4/Ethical-Hacking-Labs/tree/master/9-Denial-of-Service)**
+*The Session Hijacking attack consists of the exploitation of the web session control mechanism, which is normally managed for a session token.* [[+]](https://owasp.org/www-community/attacks/Session_hijacking_attack)
 
-## DoS
-*A Denial of Service (DoS) is a type of attack on a service that disrupts its normal function and prevents other users from accessing it. The most common target for a DoS attack is an online service such as a website, though attacks can also be launched against networks, machines or even a single program.*
+-  HTTP communication uses many different TCP connections, the web server needs a method to recognize every user’s connections.
+- The most useful method depends on a **token** that the Web Server sends to the client browser after a successful client authentication.
+- A **session token** is normally composed of a string of variable width and it could be used in different ways
+  - like in the URL, in the header of the HTTP requisition as a cookie, in other parts of the header of the HTTP request, or yet in the body of the HTTP requisition.
 
-DoS attacks can cause the following problems:
-- Ineffective services
-- Inaccessible services
-- Interruption of network traffic
-- Connection interference
+**The Session Hijacking attack compromises the session token by stealing or predicting a valid session token to gain unauthorized access to the Web Server.**
 
-## DDoS
-*A distributed denial of service (DDoS) attack is launched from numerous compromised devices, often distributed globally in what is referred to as a **botnet**.*
+<p align="center">
+<img width="70%" src="https://dpsvdv74uwwos.cloudfront.net/statics/img/blogposts/illustration-of-session-hijacking-using-xss.png" />
+</p>
+<p align="center">
+  <small>Session Hijacking using XSS</small>
+</p>
 
-![dos](https://www.imperva.com/learn/wp-content/uploads/sites/13/2019/01/hits-per-second.png)
+## **The session token could be compromised in different ways; the most common are:**
 
-**Goal:**
-- Seeks to take down a system or deny access to it by authorized users.
+### **Predictable session token**
+- The session ID information for a certain application is normally composed by a string of fixed width. **Randomness is very important** to avoid its prediction.
+  - **Example:** Session ID  value is “user01”, which corresponds to the username. By trying new values for it, like “user02”, it could be possible to get inside the application without prior authentication.
 
-### **Botnet**
-*Network of zombie computers a hacker uses to start a distributed attack.*
-  - Botnets can be designed to do malicious tasks including sending **spam, stealing data, ransomware, fraudulently clicking on ads or distributed denial-of-service (DDoS) attacks.**
-  - Can be controlled over HTTP, HTTPS, IRC, or ICQ
-  
-![botnet](https://www.f5.com/content/dam/f5-labs-v2/article/articles/edu/20190605_what_is_a_ddos/DDoS_attack.png)
+### **Session Sniffing** 
+- Sniffing can be used to hijack a session when there is non-encrypted communication between the web server and the user, and the session ID is being sent in plain text. 
+  - **Wireshark** and **Kismet** can be used to capture sensitive data packets such as the session ID from the network.
 
-- **Botnet Scanning Methods**:
-  - **Random** -  Randomly looks for vulnerable devices
-  - **Hitlist** -  Given a list of devices to scan for vulnerabilities
-  - **Topological** -  Scan hosts discovered by currently exploited devices
-  - **Local subnet** -  Scans local network for vulnerable devices
-  - **Permutation** -  Scan list of devices created through pseudorandom permutation algorithm
+### **Cross-site scripting (XSS)**
+- A server can be vulnerable to a cross-site scripting exploit, which enables an attacker to execute malicious code from the user’s side, gathering session information. An attacker can target a victim’s browser and send a scripted JavaScript link, which upon opening by the user, runs the malicious code in the browser hijacking sessions.
 
+### **CSRF - Cross-Site Request Forgery**
+- Forces an end user to execute unwanted actions on a web application in which they’re currently authenticated. With a little help of social engineering (such as sending a link via email or chat), an attacker may trick the users of a web application into executing actions of the attacker’s choosing; 
+- CSRF attack can force the user to perform state changing requests like transferring funds, changing their email address, and so forth. If the victim is an administrative account, CSRF can compromise the entire web application.
 
+- **CSRF Scenario:**
+  1. Visit your bank's site, log in.
+  2. Then visit the attacker's site (e.g. sponsored ad from an untrusted organization).
+  3. Attacker's page includes form with same fields as the bank's "Transfer Funds" form.
+  4. Form fields are pre-filled to transfer money from your account to attacker's account.
+  5. Attacker's page includes Javascript that submits form to your bank.
+  6. When form gets submitted, browser includes your cookies for the bank site, including the session token.
+  7. Bank transfers money to attacker's account.
+  8. The form can be in an iframe that is invisible, so you never know the attack occurred.
 
-## <u>Three Types of DoS / DDoS</u>
+### **Session Fixation**
+- Session Fixation is an attack that permits an attacker to hijack a valid user session. The attack explores a limitation in the way the web application manages the session ID, more specifically the vulnerable web application.
 
-### **1. Volumetric attacks**
-- Consumes the bandwidth of target network or service.
-- Send a massive amount of traffic to the target network with the goal of consuming **so much bandwidth** that users are denied access.
-- Bandwitdh depletion attack: Flood Attack and Amplification attack.
-  
-  - **Attacks**:
-    - UDP flood attack
-    - ICMP flood attack
-    - Ping of Death attack
-    - Smurf attack (IP)
-    - Fraggle (UDP)
-    - Malformed IP packet flood attack
-    - Spoofed IP packet flood attack
+- **Session fixation Scenario**:
+  1. The attacker accesses the web application login page and **receives a session ID** generated by the web application.
+  2. The attacker uses an additional technique such as **CRLF Injection, man-in-the-middle attack, social engineering,** etc., and gets the victim to use the **provided session identifier**. 
+  3. The victim accesses the web application login page and logs in to the application. After authenticating, the **web application treats anyone who uses this session ID as if they were this user.**
+  4. The attacker uses the session ID to access the web application, **take over the user session, and impersonate the victim**. 
 
-  > - ⚠️ **Volumetric attacks is measured in Bits per second (Bps).**
+### **Man-in-the-browser attack**
+- The Man-in-the-Browser attack is the same approach as Man-in-the-middle attack, but in this case a Trojan Horse is used to intercept and manipulate calls between the main application’s executable.
 
-### **2. Protocol Attacks**
-- Consume other types of resources like **connection state tables** present in the network infrastructure components such as **load balancers, firewalls, and application servers**.
-  - **Attacks**:
-    - SYN flood attack
-    - Fragmentation attack
-    - ACK flood attack
-    - TCP state exhaustion attack
-    - TCP connection flood attack
-    - RST attack
-
-  > - ⚠️ **Protocol attacks is measured in Packets per second (Pps).**
-
-### **3. Application Layer Attacks**
-
-- Includes low-and-slow attacks, GET/POST floods, attacks that target Apache, Windows or OpenBSD vulnerabilities and more.
-- Consume the resources necessary for the application to run.
-- Target web servers, web application and specific web-based apps.
-- Abuse higher-layer (7) protocols like HTTP/HTTPS and SNMP.
-  - **Attacks**:
-    - HTTP GET/POST attack
-    - Slowloris attack
-
-  > - ⚠️ **Application layer attacks is measured in Requests per second (Rps).**
-
-  > - ⚠️ **Application level attacks are against weak code.**
+### **Man-in-the-middle attack**
+- MITM attack is a general term for when a perpetrator positions himself in a conversation between a user and an application—either to eavesdrop or to impersonate one of the parties, making it appear as if a normal exchange of information is underway.
 
 
-## <u>Attacks explanation</u>
+## Other attacks
+- **Compression Ratio Info-leak Made Easy (CRIME)**:
+  - Is a security exploit against secret web cookies over connections using the HTTPS and SPDY protocols that also use data compression. When used to recover the content of secret authentication cookies, it allows an attacker to perform session hijacking.
+- **BREACH**:
+  - Is a security exploit against HTTPS when using HTTP compression (SSL/TLS compression). BREACH is built based on the CRIME security exploit.
 
-### **IP Fragmentation attacks**
-- IP / ICMP fragmentation attack is a common form of volumetric DoS. In such an attack, datagram fragmentation mechanisms are used to overwhelm the network.
+> ⚠️ **SPDY protocol manipulates HTTP traffic, with particular goals of reducing web page load latency and improving web security.**
 
-- Bombard the destination with fragmented packets, causing it to use memory to reassemble all those fragments and overwhelm a targeted network.
+- **Forbideen Attack** 
+Vulnerability in TLS that incorrectly reuse the **same cryptographic nonce when data is encrypted**. TLS specifications are clear that these arbitrary pieces of data should be used only once. When the same one is used more than once, it provides an opportunity to carry out the forbidden attack.
 
-- **Can manifest in different ways:**
-  - **UDP Flooding** - attacker sends large volumes of fragments from numerous sources.
-  - **UDP and ICMP** fragmentation attack - only parts of the packets is sent to the target; Since the packets are fake and can't be reassembled, the server's resources are quickly consumed.
-  - **TCP fragmentation attack** - also know as a Teardrop attack, targets TCP/IP reassembly mechanisms; Fragmented packets are prevented from being reassembled. The result is that data packets overlap and the targeted server becomes completely overwhelmed.
+## <u>Network Layer Attacks</u>
+- **TCP Hijacking**: TCP/IP Hijacking is when an authorized user gains access to a genuine network connection of another user. It is done in order to bypass the password authentication which is normally the start of a session.
+  - e.g: TELNET Hijacking using Ettercap, Shijack, making a blind hijacking.
 
-### **TCP state-exhaustion attack**
-- Attempt to consume connection state tables like: **Load balancers, firewalls and application servers.**
+### **Tools**
+- **Ettercap** - MiTM tool and packet sniffer on steroids
+- **Hunt** - sniff, hijack and reset connections
+- **T-Sight** - easily hijack sessions and monitor network connections
+- **Zaproxy**
+- **Burp Suite**
+- **Paros**
+- **Shijack** - TCP/IP hijack tools
+- **Juggernaut**
+- **Hamster**
+- **Ferret**
 
-### **Slowloris attack**
-*Is an application layer attack which operates by utilizing partial HTTP requests. The attack functions by opening connections to a targeted Web server and then keeping those connections open as long as it can.*
+## Countermeasures
+* **Session IDS**
+  - Using unpredictable (randomized) Session IDs
+  - Never use URL's with Sessions IDs
+  - Don't Re-use Session IDs
+- Use **HTTP-Only on Cookies** preventing XSS (Cross-Site Scripting)
+- Don't use HTTP protocol without encryption --> Use TLS/SSL [HTTPS]
+- Limiting incoming connections
+- Minimizing remote access
+- Regenerating the session key after authentication
+- Time - absolute / inactive *(e.g: 1h of inactivity the user will automatically log off)*
+- Use **MFA**
+- Use **IPSec to encrypt**
 
--  ![slowloris](https://www.cloudflare.com/img/learning/ddos/ddos-slowloris-attack/slowloris-attack-diagram.png)
-
-- The attacker first opens multiple connections to the targeted server by sending multiple partial HTTP request headers.
-- The target opens a thread for each incoming request
-- To prevent the target from timing out the connections, the attacker periodically sends partial request headers to the target in order to keep the request alive. In essence saying, “I’m still here! I’m just slow, please wait for me.”
-- The targeted server is never able to release any of the open partial connections while waiting for the termination of the request.
-- Once all available threads are in use, the server will be unable to respond to additional requests made from regular traffic, resulting in denial-of-service.
-
-### **SYN attack**
-- Sends thousands of SYN packets
-- Uses a **false source address** / spoofed IP address.
-- The server then responds to each one of the connection requests and leaves an open port ready to receive the response.
-- Eventually engages all resources and exhausts the machine
-
-### **SYN flood (half-open attack)**
-- Sends thousands of SYN packets
-- While the **server waits for the final ACK packet**, **<u>which never arrives</u>**, the attacker continues to send more SYN packets. The arrival of each new SYN packet causes the server to temporarily maintain a new open port connection for a certain length of time, and once all the available ports have been utilized the server is unable to function normally.
-- Eventually bogs down the computer, runs out of resources.
-
-- ![syn-flood](https://www.cloudflare.com/img/learning/ddos/syn-flood-ddos-attack/syn-flood-attack-ddos-attack-diagram-2.png)
-
-### **ICMP flood**
-- Sends ICMP Echo packets with a spoofed address; eventually reaches limit of packets per second sent
-  - Is possible to use `hping3` to perform ICMP flood:
-    - `hping -1 --flood --rand-source <target>`
-
-### **Smurf attack**
-- The Smurf attack is a **distributed denial-of-service** attack in which large numbers of ICMP packets with the intended victim's **spoofed source IP are broadcast to a computer network using an IP broadcast address.**
-  - Is possible to use `hping3` to perform this attack and bash script to loop through the subnet.
-    - `hping3 -1 -c 1000 10.0.0.$i --fast -a <spoofed target>`
-  - ![smurf](https://www.imperva.com/learn/wp-content/uploads/sites/13/2019/01/smurf-attack-ddos.png)
-
-### **Fraggle**
-- Same concept as Smurf attack but with **UDP packets** (UDP flood attack).
-  - Is possible to use `hping3` to perform Fraggle attack/ UDP flood
-    - `hping3 --flood --rand-source --udp -p <target>`
-
-### **Ping of Death**
-- Fragments ICMP messages; after reassembled, the ICMP packet is larger than the maximum size and crashes the system
-  -  Performs by sending an IP packet larger than the 65,536 bytes  allowed by the IP protocol.
-  - Old technique that can be acceptable to old systems. 
-
-### **Teardrop**
-- Overlaps a large number of garbled IP fragments with oversized payloads; causes older systems to crash due to fragment reassembly
-
-### **Peer to peer**
-- Clients of peer-to-peer file-sharing hub are disconnected and directed to connect to the target system
-
-### **Multi-vector attack**
-- Is a combination of **Volumetric, protocol, and application-layer attacks**.
-
-### **Phlashing / Permanent DoS**
-- A DoS attack that causes permanent damage to a system.
-- Modifies the firmware and can also cause a **system to brick**.
-- *e.g: Send fraudulent hardware update to victim; crashing BIOS.*
-
-### **LAND attack**
-- Sends a SYN packet to the target with a spoofed IP the same as the target; if vulnerable, target loops endlessly and crashes
-
-
-## <u>DoS/DDoS Attack Tools:</u>
-- **Low Orbit Ion Cannon** (LOIC) - DDoS tool that floods a target with TCP, UDP or HTTP requests
-  -  ![loic](https://i.ytimg.com/vi/HavEPVxUn-A/maxresdefault.jpg)
-
-- **High Orbit Ion Cannon** (HOIC) - More powerful version of LOIC; Targets TCP and UDP; The application can open up to 256 simultaneous attack sessions at once, bringing down a target system by sending a continuous stream of junk traffic until legitimate requests are no longer able to be processed; 
-  -  ![hoic](https://upload.wikimedia.org/wikipedia/commons/d/d8/HOIC_INTERFACE.png)
-
-- **Other Tools**
-  - HULK
-  - Metasploit
-  - Nmap
-  - Tsunami
-  - Trinity - Linux based DDoS tool
-  - Tribe Flood Network - uses voluntary botnet systems to launch massive flood attacks
-  - RUDY (R-U-Dead-Yet?) - DoS with HTTP POST via long-form field submissions
-
-## <u>Mitigations</u>
-- Traffic analysis
-- Filtering
-- Firewalls
-- ACLs
-- Reverse Proxies
-- Rate limiting - limiting the maximum number of connections a single IP address is allowed to make)
-- Load balancers
-- DoS prevention software
+### IPSec
+- **Transport Mode** - payload and ESP trailer are encrypted; IP header is not
+- **Tunnel mode** - everything is encrypted; cannot be used with NAT
+- **Architecture Protocols**
+  - **Authentication Header** - guarantees the integrity and authentication of IP packet sender
+  - **Encapsulating Security Payload** (ESP) - provides origin authenticity and integrity as well as confidentiality
+  - **Internet Key Exchange** (IKE) - produces the keys for the encryption process
+  - **Oakley** - uses Diffie-Hellman to create master and session keys
+  - **Internet Security Association Key Management Protocol** (ISAKMP) - software that facilitates encrypted communication between two endpoints
