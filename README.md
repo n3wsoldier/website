@@ -1,113 +1,107 @@
-# 9. <u>Session Hijacking</u>
+# 10. Hacking Web Servers
 
-> ⚡︎ **This chapter has [practical labs](https://github.com/Samsar4/Ethical-Hacking-Labs/tree/master/10-Session-Hijacking)**
+## <u>Web Server Attack Methodology</u>
 
-*The Session Hijacking attack consists of the exploitation of the web session control mechanism, which is normally managed for a session token.* [[+]](https://owasp.org/www-community/attacks/Session_hijacking_attack)
+- **Information Gathering** - Internet searches, whois, reviewing robots.txt
 
--  HTTP communication uses many different TCP connections, the web server needs a method to recognize every user’s connections.
-- The most useful method depends on a **token** that the Web Server sends to the client browser after a successful client authentication.
-- A **session token** is normally composed of a string of variable width and it could be used in different ways
-  - like in the URL, in the header of the HTTP requisition as a cookie, in other parts of the header of the HTTP request, or yet in the body of the HTTP requisition.
+- **Web  Server Footprinting** - banner grabbing
+  - **Tools**
+    - Netcraft
+    - HTTPRecon
+    - theHarvester
+    - ID Serve
+    - HTTPrint
+    - nmap
+      - `nmap --script http-trace -p80 localhost`
+        - Detects vulnerable TRACE method
+      - `nmap --script http-google-email <host>`
+        -  Lists email addresses
+      - `nmap --script hostmap-* <host>`
+        - dDiscovers virtual hosts on the IP address you are trying to footprint; * is replaced by online db such as  IP2Hosts
+      - `nmap --script http-enum -p80 <host>`
+        - Enumerates common web apps
+      - `nmap --script http-robots.txt -p 80 <host>`
+        - Grabs the robots.txt file
+        
+- **Website Mirroring** - brings the site to your own machine to examine structure, etc.
+  - **Tools**
+    - Wget
+    - BlackWidow
+    - HTTrack
+    - WebCopier Pro
+    - Web Ripper
+    - SurfOffline
 
-**The Session Hijacking attack compromises the session token by stealing or predicting a valid session token to gain unauthorized access to the Web Server.**
+- **Vulnerability Scanning** - scans web server for vulnerabilities
+  - **Tools**
+    - Nessus
+    - Nikto - specifically suited for web servers; still very noisy like Nessus
 
-<p align="center">
-<img width="70%" src="https://dpsvdv74uwwos.cloudfront.net/statics/img/blogposts/illustration-of-session-hijacking-using-xss.png" />
-</p>
-<p align="center">
-  <small>Session Hijacking using XSS</small>
-</p>
+- **Session Hijacking**
 
-## **The session token could be compromised in different ways; the most common are:**
+- **Web Server Password Cracking**
 
-### **Predictable session token**
-- The session ID information for a certain application is normally composed by a string of fixed width. **Randomness is very important** to avoid its prediction.
-  - **Example:** Session ID  value is “user01”, which corresponds to the username. By trying new values for it, like “user02”, it could be possible to get inside the application without prior authentication.
+## <u>Web Server Architecture</u>
 
-### **Session Sniffing** 
-- Sniffing can be used to hijack a session when there is non-encrypted communication between the web server and the user, and the session ID is being sent in plain text. 
-  - **Wireshark** and **Kismet** can be used to capture sensitive data packets such as the session ID from the network.
+- **Most Popular Servers** - Apache, Microsoft IIS and Nginx
+  - Apache runs configurations as a part of a module within special files (http.conf, etc.)
+  - IIS runs all applications in the context of LOCAL_SYSTEM
+  - IIS 5 had a ton of bugs - easy to get into
+- **N-Tier Architecture** - distributes processes across multiple servers; normally as three-tier: Presentation (web), logic (application) and data (database)
+- **Error Reporting** - should not be showing errors in production; easy to glean information
+- **HTML** - markup language used to display web pages
+- **HTTP Request Methods**
+  - **GET** - retrieves whatever information is in the URL; sending data is done in URL
+  - **HEAD** - identical to get except for no body return
+  - **POST** - sends data via body - data not shown in URL or in history
+  - **PUT** - requests data be stored at the URL
+  - **DELETE** - requests origin server delete resource
+  - **TRACE** - requests application layer loopback of message
+  - **CONNECT** - reserved for use with proxy
+  - Both POST and GET can be manipulated by a web proxy
+- **HTTP Error Messages**
+  - **1xx: Informational** - request received, continuing
+  - **2xx: Success** - action received, understood and accepted
+  - **3xx: Redirection** - further action must be taken
+  - **4xx: Client Error** - request contains bad syntax or cannot be fulfilled
+  - **5xx: Server Error** - server failed to fulfill an apparently valid request
 
-### **Cross-site scripting (XSS)**
-- A server can be vulnerable to a cross-site scripting exploit, which enables an attacker to execute malicious code from the user’s side, gathering session information. An attacker can target a victim’s browser and send a scripted JavaScript link, which upon opening by the user, runs the malicious code in the browser hijacking sessions.
+## <u>Web Server Attacks</u>
 
-### **CSRF - Cross-Site Request Forgery**
-- Forces an end user to execute unwanted actions on a web application in which they’re currently authenticated. With a little help of social engineering (such as sending a link via email or chat), an attacker may trick the users of a web application into executing actions of the attacker’s choosing; 
-- CSRF attack can force the user to perform state changing requests like transferring funds, changing their email address, and so forth. If the victim is an administrative account, CSRF can compromise the entire web application.
+- **DNS Amplification** - Uses recursive DNS to DoS a target; amplifies DNS answers to target until it can't do anything
 
-- **CSRF Scenario:**
-  1. Visit your bank's site, log in.
-  2. Then visit the attacker's site (e.g. sponsored ad from an untrusted organization).
-  3. Attacker's page includes form with same fields as the bank's "Transfer Funds" form.
-  4. Form fields are pre-filled to transfer money from your account to attacker's account.
-  5. Attacker's page includes Javascript that submits form to your bank.
-  6. When form gets submitted, browser includes your cookies for the bank site, including the session token.
-  7. Bank transfers money to attacker's account.
-  8. The form can be in an iframe that is invisible, so you never know the attack occurred.
+- **Directory Transversal** (../ or dot-dot-slash) - requests file that should not be accessible from web server
+  - Example: http://www.example.com/../../../../etc/password
+  - Can use Unicode to possibly evade IDS - %2e for dot and %sf for slash
 
-### **Session Fixation**
-- Session Fixation is an attack that permits an attacker to hijack a valid user session. The attack explores a limitation in the way the web application manages the session ID, more specifically the vulnerable web application.
+- **Parameter Tampering** (URL Tampering) - Manipulating parameters within URL to achieve escalation or other changes
 
-- **Session fixation Scenario**:
-  1. The attacker accesses the web application login page and **receives a session ID** generated by the web application.
-  2. The attacker uses an additional technique such as **CRLF Injection, man-in-the-middle attack, social engineering,** etc., and gets the victim to use the **provided session identifier**. 
-  3. The victim accesses the web application login page and logs in to the application. After authenticating, the **web application treats anyone who uses this session ID as if they were this user.**
-  4. The attacker uses the session ID to access the web application, **take over the user session, and impersonate the victim**. 
+- **Hidden Field Tampering** - Modifying hidden form fields producing unintended results
 
-### **Man-in-the-browser attack**
-- The Man-in-the-Browser attack is the same approach as Man-in-the-middle attack, but in this case a Trojan Horse is used to intercept and manipulate calls between the main application’s executable.
+- **HTTP Response Splitting** - An attacker passes malicious data to a vulnerable application through the HTTP response header.
 
-### **Man-in-the-middle attack**
-- MITM attack is a general term for when a perpetrator positions himself in a conversation between a user and an application—either to eavesdrop or to impersonate one of the parties, making it appear as if a normal exchange of information is underway.
+- **Web Cache Poisoning** - Replacing the cache on a box with a malicious version of it
 
+- **WFETCH** - Microsoft tool that allows you to craft HTTP requests to see response data
 
-## Other attacks
-- **Compression Ratio Info-leak Made Easy (CRIME)**:
-  - Is a security exploit against secret web cookies over connections using the HTTPS and SPDY protocols that also use data compression. When used to recover the content of secret authentication cookies, it allows an attacker to perform session hijacking.
-- **BREACH**:
-  - Is a security exploit against HTTPS when using HTTP compression (SSL/TLS compression). BREACH is built based on the CRIME security exploit.
+- **Misconfiguration Attack** - Same as before - improper configuration of a web server. (e.g: Default settings like admin/password credentials; Lack of security controls)
 
-> ⚠️ **SPDY protocol manipulates HTTP traffic, with particular goals of reducing web page load latency and improving web security.**
+- **Password Attack** - Attempting to crack passwords related to web resources
 
-- **Forbideen Attack** 
-Vulnerability in TLS that incorrectly reuse the **same cryptographic nonce when data is encrypted**. TLS specifications are clear that these arbitrary pieces of data should be used only once. When the same one is used more than once, it provides an opportunity to carry out the forbidden attack.
+- **Connection String Parameter Pollution** - Injection attack that uses semicolons to take advantage of databases that use this separation method
 
-## <u>Network Layer Attacks</u>
-- **TCP Hijacking**: TCP/IP Hijacking is when an authorized user gains access to a genuine network connection of another user. It is done in order to bypass the password authentication which is normally the start of a session.
-  - e.g: TELNET Hijacking using Ettercap, Shijack, making a blind hijacking.
+- **Web Defacement** - Simply modifying a web page to say something else
 
-### **Tools**
-- **Ettercap** - MiTM tool and packet sniffer on steroids
-- **Hunt** - sniff, hijack and reset connections
-- **T-Sight** - easily hijack sessions and monitor network connections
-- **Zaproxy**
-- **Burp Suite**
-- **Paros**
-- **Shijack** - TCP/IP hijack tools
-- **Juggernaut**
-- **Hamster**
-- **Ferret**
+- **DoS/DDoS** - Compromise availability 
 
-## Countermeasures
-* **Session IDS**
-  - Using unpredictable (randomized) Session IDs
-  - Never use URL's with Sessions IDs
-  - Don't Re-use Session IDs
-- Use **HTTP-Only on Cookies** preventing XSS (Cross-Site Scripting)
-- Don't use HTTP protocol without encryption --> Use TLS/SSL [HTTPS]
-- Limiting incoming connections
-- Minimizing remote access
-- Regenerating the session key after authentication
-- Time - absolute / inactive *(e.g: 1h of inactivity the user will automatically log off)*
-- Use **MFA**
-- Use **IPSec to encrypt**
+- **Shellshock** - Causes Bash to unintentionally execute commands when commands are concatenated on the end of function definitions
 
-### IPSec
-- **Transport Mode** - payload and ESP trailer are encrypted; IP header is not
-- **Tunnel mode** - everything is encrypted; cannot be used with NAT
-- **Architecture Protocols**
-  - **Authentication Header** - guarantees the integrity and authentication of IP packet sender
-  - **Encapsulating Security Payload** (ESP) - provides origin authenticity and integrity as well as confidentiality
-  - **Internet Key Exchange** (IKE) - produces the keys for the encryption process
-  - **Oakley** - uses Diffie-Hellman to create master and session keys
-  - **Internet Security Association Key Management Protocol** (ISAKMP) - software that facilitates encrypted communication between two endpoints
+- **Tools**
+  - **Brutus** - brute force web passwords of HTTP
+  - **Hydra** - network login cracker
+  - **Metasploit**
+    - Basic working is Libraries use Interfaces and Modules to send attacks to services
+    - **Exploits** hold the actual exploit
+    - **Payload** contains the arbitrary code if exploit is successful
+    - **Auxiliary** used for one-off actions (like a scan)
+    - **NOPS** used for buffer-overflow type operations
